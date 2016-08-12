@@ -253,7 +253,7 @@ def seqs_during_exposure_period(id):
     # YYY weeks after dx
     t1 = t1 + pd.Timedelta(weeks=weeks_after)
     
-    ix, = np.where((tt > t0) & (tt <= t1))
+    ix, = np.where((tt >= t0) & (tt < t1))
 
     return pd.Series(
             {'code_seq': ' '.join(t[ix]),
