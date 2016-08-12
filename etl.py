@@ -28,8 +28,7 @@ def partial_data_frame(self, lines):
     return pd.DataFrame(data[1:], columns=data[0], dtype='str')
 
 # load data (slow)
-#dname = '/homes/abie/projects/2015/TICS/multiyear/'
-dname = '/home/j/Project/Models/TICS/'
+dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/raw_data/'
 def read_sas(fname):
     import sas7bdat
     with sas7bdat.SAS7BDAT(fname) as f:
@@ -71,9 +70,11 @@ def has_dvt_dx(s):
         if str(s[var]) in colonic_dvt_codes:
             return True
     return False
-assert has_dvt_dx(pd.Series({'DX1': '', 'DX2': ''})) == False
-assert has_dvt_dx(pd.Series({'DX1': '56211', 'DX2': ''})) == True
-assert has_dvt_dx(pd.Series({'DX1': 'N10', 'DX2': '56213'})) == True
+assert has_dvt_dx(pd.Series({'DX1': '', 'DX2': '', 'DX3': '', 'DX4': '',})) == False
+assert has_dvt_dx(pd.Series({'DX1': '56211', 'DX2': '', 'DX3': '', 'DX4': '',})) == True
+assert has_dvt_dx(pd.Series({'DX1': 'N10', 'DX2': '56213', 'DX3': '', 'DX4': '',})) == True
+assert has_dvt_dx(pd.Series({'DX1': '', 'DX2': '', 'DX3': '56213', 'DX4': '',})) == True
+assert has_dvt_dx(pd.Series({'DX1': '', 'DX2': '', 'DX3': '', 'DX4': '56213',})) == True
 
 
 surgery_ICD_codes = '45.41 45.7 45.71 45.72 45.73 45.74 45.75 45.76 45.79 45.8 45.82 45.83 45.92 45.93 45.94 46.01 ' \
@@ -224,5 +225,6 @@ df = pd.DataFrame(X, columns=['id', 'year', 'age', 'sex',
                               'dvt', 'emergency_dvt', 'dvt_surgery',
                               'fully_enrolled',
                               'code_seq', 'date_seq', 'emrg_seq', 'out_seq', 'in_seq'])
-df.to_csv('/ihme/scratch/users/abie/projects/2016/TICS/{}.csv'.format(year), index=False)
+dname='/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
+df.to_csv(dname + '{}.csv'.format(year), index=False)
 
