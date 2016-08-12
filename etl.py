@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 
 assert len(sys.argv) in [2,3], 'usage: python etl.py YEAR [fast_test]'
 print sys.argv[1:]
@@ -9,13 +10,6 @@ if len(sys.argv) == 3:
     fast_test = True
 else:
     fast_test = False
-
-# use map that DEX is using:
-import pandas as pd, numpy as np
-dex_map = pd.read_stata('/home/j/Project/IRH/DEX/USA/10_resources/12_maps/data/map_DEX.dta')
-
-acause_map = dex_map.yld_cause
-acause_map.index = dex_map.cause_code
 
 # for testing, load only part of dataframe
 def partial_data_frame(self, lines):
@@ -73,10 +67,9 @@ for l in 'aodis':
 colonic_dvt_codes = '56211 56213'.split()
 
 def has_dvt_dx(s):
-    if str(s['DX1']) in colonic_dvt_codes:
-        return True
-    if str(s['DX2']) in colonic_dvt_codes:
-        return True
+    for var in ['DX1', 'DX2', 'DX3', 'DX4']:
+        if str(s[var]) in colonic_dvt_codes:
+            return True
     return False
 assert has_dvt_dx(pd.Series({'DX1': '', 'DX2': ''})) == False
 assert has_dvt_dx(pd.Series({'DX1': '56211', 'DX2': ''})) == True
