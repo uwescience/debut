@@ -1,6 +1,7 @@
 """ functions to test data methods"""
 
 import pytest
+import numpy as np, pandas as pd
 import data
 
 @pytest.fixture
@@ -25,3 +26,26 @@ def test_emergency_surgery(df):
 def test_included_subjects(df):
     subjs = data.included_subjects(df)
     assert len(subjs) == 214
+
+def test_seqs_dur_exposure_period(df):
+    s = data.seqs_during_exposure_period(df, df.index[0], -10, 10)
+    assert 'code_seq' in s.keys()
+
+    s = data.seqs_during_exposure_period(df, df.index[0], 0, 0)
+    date_list = s['date_seq'].split()
+    assert len(np.unique(date_list)) == 1
+
+def test_days_until_surgery(df):
+    s = df.iloc[0]
+    days = data.days_until_surgery(s)
+    assert np.isinf(days)
+
+    s = pd.Series({'code_seq':'icd9-56211 cpt-44110',
+                   'date_seq':'2014-01-17 2014-01-17'})
+    days = data.days_until_surgery(s)
+    assert days == 0
+
+def test_clipped_labeled_sequences(df):
+    rows = df.index[::5]
+    new_df = data.clipped_labeled_sequences(df, rows, -1, 1)
+    assert len(new_df) == np.floor(len(df) / 5) + 1

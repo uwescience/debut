@@ -6,6 +6,9 @@ Included methods:
   surgery_for_cancer
   emergency_surgery
   included_subjects
+  seqs_dur_exposure_period
+  days_until_surgery
+  clipped_labeled_sequences
 """
 
 import glob
@@ -231,3 +234,110 @@ def included_subjects(df):
     print('of which {} were finally included in analysis'.format(len(subjects)))
 
     return subjects
+
+subjs_wo_dx = []
+def seqs_during_exposure_period(df, id, weeks_before, weeks_after):
+    """clip sequences to include only specified time period
+    
+    Parameters
+    ----------
+    df : pd.DataFrame with columns code_seq, date_seq
+    id : row in df to clip
+    weeks_before, weeks_after : int specifying time period to clip to
+    
+    Results
+    -------
+    returns pd.Series with code_seq, date_seq
+    """
+    global subjs_wo_dx
+
+    t = pd.Series(df.code_seq[id].split())
+    ix, = np.where(t.isin(colonic_dvt_codes)) # ix_,_ is weird because np.where has strange return format
+    if len(ix) == 0:
+        # no dx, should not be in cohort
+        subjs_wo_dx.append(id)
+        return pd.Series(
+            {'code_seq': np.nan,
+             'date_seq': np.nan})
+    
+    # index of first diagnosis
+    i = ix[0]
+    
+    # date of first dx
+    tt = pd.Series(df.date_seq[id].split()).map(pd.Timestamp)
+    t1 = tt[i]
+    
+    # XXX weeks before dx
+    t0 = t1 - pd.Timedelta(weeks=weeks_before)
+    
+    # YYY weeks after dx
+    t1 = t1 + pd.Timedelta(weeks=weeks_after)
+    
+    ix, = np.where((tt >= t0) & (tt <= t1))
+
+    return pd.Series(
+            {'code_seq': ' '.join(t[ix]),
+             'date_seq': ' '.join([d.strftime('%Y-%m-%d') for d in tt[ix]])})
+
+def days_until_surgery(s):
+    """calculate time from diagnosis until surgery in days
+
+    Parameters
+    ----------
+    s : pd.Series
+
+    Results
+    -------
+
+    Returns days as float, or np.inf if no surgery took place
+
+    """
+    cs = s['code_seq'].split()
+    cs = pd.Series(cs)
+    surgery_ix, = np.where(cs.isin(surgery_CPT_codes + surgery_ICD_codes))
+
+    if len(surgery_ix) > 0:
+        cs = pd.Series(cs)
+        ds = pd.Series(s['date_seq'].split())
+        ds = ds.map(pd.Timestamp)
+        
+        surgery_0 = surgery_ix[0]
+        day_of_surgery = ds[surgery_0]
+        
+        dx_ix, = np.where(cs.isin(colonic_dvt_codes))
+        if len(dx_ix) == 0:
+            # no dx, should not be in cohort
+            return np.nan
+        
+        # index of first diagnosis
+        dx_0 = dx_ix[0]
+        # date of first dx
+        t0 = ds[dx_0]
+        return (day_of_surgery - t0).days
+    else:
+        return np.inf
+
+def clipped_labeled_sequences(df, subjects, weeks_before, weeks_after):
+    """transform full dataframe by selecting only subject rows, and only
+    sequence from weeks_before to weeks_after; then label with days until surgery
+
+    Parameters
+    ----------
+    df : pd.DataFrame with columns code_seq, date_seq
+    subjects : rows in df to keep
+    weeks_before, weeks_after : int specifying time period to clip to
+    
+    Results
+    -------
+    returns pd.DataFrame with code_seq (str), date_seq (str), and y_days (float)
+    """
+    patient_df = []
+    for subj_id in subjects:
+        s = seqs_during_exposure_period(df, subj_id, weeks_before, weeks_after)
+        s['y_days'] = days_until_surgery(df.loc[subj_id])
+        patient_df.append(s)
+    
+    patient_df = pd.DataFrame(patient_df, index=subjects)
+    return patient_df
+
+
