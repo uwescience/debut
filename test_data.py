@@ -49,3 +49,7 @@ def test_clipped_labeled_sequences(df):
     rows = df.index[::5]
     new_df = data.clipped_labeled_sequences(df, rows, -1, 1)
     assert len(new_df) == np.floor(len(df) / 5) + 1
+
+def test_bigram_feature_vectors(df):
+    X = data.bigram_feature_vectors(df)
+    assert len(X.shape) == 2

@@ -257,8 +257,8 @@ def seqs_during_exposure_period(df, id, weeks_before, weeks_after):
         # no dx, should not be in cohort
         subjs_wo_dx.append(id)
         return pd.Series(
-            {'code_seq': np.nan,
-             'date_seq': np.nan})
+            {'code_seq': '',
+             'date_seq': ''})
     
     # index of first diagnosis
     i = ix[0]
@@ -340,4 +340,52 @@ def clipped_labeled_sequences(df, subjects, weeks_before, weeks_after):
     patient_df = pd.DataFrame(patient_df, index=subjects)
     return patient_df
 
+def bigram_feature_vectors(df):
+    """form bigram features from code sequence in df
 
+    Parameters
+    ----------
+    df : pd.DataFrame with code_seq column
+    
+    Results
+    -------
+    returns sparse array of bigram counts
+    """
+
+    import sklearn.feature_extraction
+
+    ngram_range = (1,2)
+
+    trx = sklearn.feature_extraction.text.CountVectorizer(
+        ngram_range=ngram_range,
+        min_df=10,  # minimum number of docs that must contain n-gram to include as a column
+        tokenizer=lambda x: [x_i.strip() for x_i in x.split()]  # keep '-' characters in tokens
+    )
+
+    X = trx.fit_transform(df.code_seq)
+    return X
+
+def load_prepped_df(weeks_after=48):
+    """Load prepped dataframe for code sequences up to specified number of
+    weeks after diagnosis; after filtering to remove surgeries before
+    52 weeks.
+
+    Parameters
+    ----------
+    weeks_after : int, cached for values in range(-4, 49, 4)
+
+    Results
+    -------
+    returns df, X, y
+    """
+
+    dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
+    fname = dname + 'clipped_{:02d}_labeled_subject_sequences.csv'.format(weeks_after)
+
+    patient_df = pd.read_csv(fname)
+
+    patient_df = patient_df[patient_df.y_days >= 52]
+    X = bigram_feature_vectors(patient_df)
+    y = np.array(patient_df.y_days <= 2*52*7, dtype=float)
+
+    return patient_df, X, y
