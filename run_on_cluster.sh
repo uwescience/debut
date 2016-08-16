@@ -30,7 +30,7 @@ echo "**** JOB RUNNING IN $GSITSPWD"
 
 #source /usr/local/anaconda-current/bin/activate  /usr/local/anaconda-current
 #source deactivate
-source activate testenv
+source activate /snfs2/HOME/abie/anaconda/envs/testenv
 echo calling python -u "$@"
 python -u "$@"
 
