@@ -11,6 +11,7 @@ Contents:
 * test_data.py - tests for data methods, execute with `py.test`
 * 2016_08_15a_debut_etl_on_prod_cluster.ipynb - notebook to launch etl process on cluster
 * 2016_07_18b_debut_table_data_calcs_and_checks.ipynb - script to do some analysis of the complex sequence data
+* 2016_08_16a_debut_tics_refactored_additional_data_prep.ipynb - script to do some additional data prep
 
 Details: probably only runs on IHME cluster, possibly requires `source
 activate testenv`, which includes the dev version of sklearn.
