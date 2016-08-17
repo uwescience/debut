@@ -361,8 +361,8 @@ def bigram_feature_vectors(df):
         min_df=10,  # minimum number of docs that must contain n-gram to include as a column
         tokenizer=lambda x: [x_i.strip() for x_i in x.split()]  # keep '-' characters in tokens
     )
-
-    X = trx.fit_transform(df.code_seq)
+    
+    X = trx.fit_transform(df.code_seq.fillna(''))
     return X
 
 def load_prepped_df(weeks_after=48):

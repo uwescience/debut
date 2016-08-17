@@ -2,11 +2,14 @@ import sys, pandas as pd
 import sklearn.naive_bayes, sklearn.ensemble, sklearn.linear_model, sklearn.model_selection
 import data, model
 
-assert len(sys.argv) in [2,], 'usage: python auc.py rep'
+assert len(sys.argv) in [2,3], 'usage: python auc.py rep [weeks]'
 rep = int(sys.argv[1])
+if len(sys.argv) == 3:
+    weeks_after = int(sys.argv[2])
+else:
+    weeks_after = 48 # default
 print(sys.argv)
 
-weeks_after = 48 # TODO: make this a parameter
 
 patient_df, X, y = data.load_prepped_df(weeks_after)
 
@@ -26,6 +29,10 @@ clf_dict = {'GBM': sklearn.model_selection.GridSearchCV(sklearn.ensemble.Gradien
 
 all_results = pd.DataFrame()
 for clf_name, clf in clf_dict.iteritems():
+    if weeks_after != 48:
+        if clf_name != 'GBM':
+            continue # skip other methods for sweep through weeks
+
     print(clf_name)
     sys.stdout.flush()
 
@@ -33,7 +40,7 @@ for clf_name, clf in clf_dict.iteritems():
     results['clf_name'] = clf_name
     results['weeks_after'] = weeks_after
     print(results.auc.describe())
-    all_results.append(results)
+    all_results = all_results.append(results)
 
     dname = '/homes/abie/projects/2016/TICS/'
     all_results.to_csv(dname + 'auc_results_{:02d}_{:02d}.csv'.format(rep, weeks_after), index=False)
