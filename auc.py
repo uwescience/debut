@@ -1,4 +1,4 @@
-import sys, pandas as pd
+import sys, numpy as np, pandas as pd
 import sklearn.naive_bayes, sklearn.ensemble, sklearn.linear_model, sklearn.model_selection
 import data, model
 
@@ -10,15 +10,14 @@ else:
     weeks_after = 48 # default
 print(sys.argv)
 
+# set random seed for reproducibility
+np.random.seed(12345+rep)
 
+# load data
 patient_df, X, y = data.load_prepped_df(weeks_after)
 
-# use a subset of data for faster testing
-#patient_df = patient_df.iloc[:2000]
-#X = X[:2000]
-#y = y[:2000]
-
-n_jobs = 10
+# create dict of ML methods to consider
+n_jobs = 10  # make sure to request corresponding resource level on cluster
 clf_dict = {'GBM': sklearn.model_selection.GridSearchCV(sklearn.ensemble.GradientBoostingClassifier(),
                                                         param_grid={'max_depth':[1,3,5,7,9,11]}, n_jobs=n_jobs),
             'NB': sklearn.model_selection.GridSearchCV(sklearn.naive_bayes.BernoulliNB(),
@@ -27,10 +26,11 @@ clf_dict = {'GBM': sklearn.model_selection.GridSearchCV(sklearn.ensemble.Gradien
             'RF': sklearn.ensemble.RandomForestClassifier(n_estimators=100, n_jobs=n_jobs, class_weight='balanced'),
            }
 
+# run models and save results
 all_results = pd.DataFrame()
 for clf_name, clf in clf_dict.iteritems():
     if weeks_after != 48:
-        if clf_name != 'GBM':
+        if clf_name != 'RF':
             continue # skip other methods for sweep through weeks
 
     print(clf_name)
@@ -42,6 +42,7 @@ for clf_name, clf in clf_dict.iteritems():
     print(results.auc.describe())
     all_results = all_results.append(results)
 
+    # save results as you go, to fail faster
     dname = '/homes/abie/projects/2016/TICS/'
     all_results.to_csv(dname + 'auc_results_{:02d}_{:02d}.csv'.format(rep, weeks_after), index=False)
 

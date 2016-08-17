@@ -3,6 +3,7 @@
 Included methods:
 """
 
+import sys
 import numpy as np, pandas as pd
 import sklearn.model_selection
 
@@ -28,6 +29,8 @@ def auc_est(clf, X, y, reps, folds):
         cv = sklearn.model_selection.KFold(n_folds=10, shuffle=True, random_state=12345+rep)
         for fold, (train, test) in enumerate(cv.split(X, y)):
             if (rep in reps) and (fold in folds):
+                print('rep {}, fold {}'.format(rep, fold))
+                sys.stdout.flush()
                 # fit on training data
                 clf.fit(X[train], y[train])
 
