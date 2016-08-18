@@ -29,10 +29,6 @@ clf_dict = {'GBM': sklearn.model_selection.GridSearchCV(sklearn.ensemble.Gradien
 # run models and save results
 all_results = pd.DataFrame()
 for clf_name, clf in clf_dict.iteritems():
-    if weeks_after != 48:
-        if clf_name != 'RF':
-            continue # skip other methods for sweep through weeks
-
     print(clf_name)
     sys.stdout.flush()
 
