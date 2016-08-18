@@ -389,7 +389,7 @@ def load_prepped_df(weeks_after=48):
     dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
     fname = dname + 'clipped_{:02d}_labeled_subject_sequences.csv'.format(weeks_after)
 
-    patient_df = pd.read_csv(fname)
+    patient_df = pd.read_csv(fname, index_col=0)
 
     patient_df = patient_df[patient_df.y_days >= 52]
     X = bigram_feature_vectors(patient_df)

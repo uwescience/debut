@@ -170,6 +170,7 @@ def feature_for(key):
     # extract sequence data
     code_seq, date_seq, emrg_seq = [], [], []
     out_seq, in_seq = [], []
+    pay_seq, copay_seq, deduct_seq, coins_seq, cob_seq = [], [], [], [], []
     for i, tt in df.iterrows():
         dt = tt['SVCDATE']
         if has_dvt_dx(tt) or has_surgery_code(tt):
@@ -198,17 +199,32 @@ def feature_for(key):
                 out_seq.append(str(int(tt['table'] == 'o')))
                 in_seq.append(str(int(tt['table'] == 's')))
 
+                pay_seq.append(str(tt['PAY']))
+                copay_seq.append(str(tt['COPAY']))
+                deduct_seq.append(str(tt['DEDUCT']))
+                coins_seq.append(str(tt['COINS']))
+                cob_seq.append(str(tt['COB']))
+
     code_seq = ' '.join(code_seq)
     date_seq = ' '.join([d.strftime('%Y-%m-%d') for d in date_seq])
     emrg_seq = ' '.join(emrg_seq)
     in_seq = ' '.join(in_seq)
     out_seq = ' '.join(out_seq)
+
+    pay_seq = ' '.join(pay_seq)
+    copay_seq = ' '.join(copay_seq)
+    deduct_seq = ' '.join(deduct_seq)
+    coins_seq = ' '.join(coins_seq)
+    cob_seq = ' '.join(cob_seq)
+
     return dict(id=int(key), age=int(age), sex=sex, year=int(year),
                 fully_enrolled=int(fully_enrolled),
                 dvt=dvt, emergency_dvt=emergency_dvt,
                 dvt_surgery=dvt_surgery,
                 code_seq=code_seq, date_seq=date_seq,
-                 emrg_seq=emrg_seq, out_seq=out_seq, in_seq=in_seq)
+                emrg_seq=emrg_seq, out_seq=out_seq, in_seq=in_seq,
+                pay_seq=pay_seq, copay_seq=copay_seq, deduct_seq=deduct_seq, coins_seq=coins_seq, cob_seq=cob_seq, 
+    )
 
 # group all cohort files by id for easy access
 X_i = feature_for(id_list[0])
@@ -224,7 +240,13 @@ for id in id_list:
 df = pd.DataFrame(X, columns=['id', 'year', 'age', 'sex',
                               'dvt', 'emergency_dvt', 'dvt_surgery',
                               'fully_enrolled',
-                              'code_seq', 'date_seq', 'emrg_seq', 'out_seq', 'in_seq'])
-dname='/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
-df.to_csv(dname + '{}.csv'.format(year), index=False)
+                              'code_seq', 'date_seq', 'emrg_seq',
+                              'out_seq', 'in_seq',
+                              'pay_seq', 'copay_seq', 'deduct_seq', 'coins_seq', 'cob_seq',
+                          ])
+dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
+fname = dname + '{}.csv'.format(year)
+if fast_test:
+    fname += '_fast'
+df.to_csv(fname, index=False)
 
