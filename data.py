@@ -45,6 +45,7 @@ def load(nrows=None):
     date_seq = t.date_seq.fillna('')
     emrg_seq = t.emrg_seq.fillna('')
     in_seq = t.in_seq.fillna('')
+    pay_seq = t.pay_seq.fillna('')
 
     for y in range(2008, 2015):
         t = df_dict[y]
@@ -60,16 +61,21 @@ def load(nrows=None):
 
         in_seq += ' '
         in_seq = in_seq.add(t.in_seq, fill_value='')
+
+        pay_seq += ' '
+        pay_seq = pay_seq.add(t.pay_seq, fill_value='')
     
     code_seq = code_seq.fillna('')
     date_seq = date_seq.fillna('')
     emrg_seq = emrg_seq.fillna('')
     in_seq = in_seq.fillna('')
+    pay_seq = pay_seq.fillna('')
 
     return pd.DataFrame({'code_seq': code_seq,
                          'date_seq': date_seq,
                          'emrg_seq': emrg_seq,
                          'in_seq': in_seq,
+                         'pay_seq': pay_seq,
                         })
 
 

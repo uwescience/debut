@@ -198,7 +198,6 @@ def feature_for(key):
                 emrg_seq.append(str(int(has_emergent_code(tt))))
                 out_seq.append(str(int(tt['table'] == 'o')))
                 in_seq.append(str(int(tt['table'] == 's')))
-
                 pay_seq.append(str(tt['PAY']))
                 copay_seq.append(str(tt['COPAY']))
                 deduct_seq.append(str(tt['DEDUCT']))
