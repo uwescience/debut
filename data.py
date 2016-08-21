@@ -409,7 +409,9 @@ def load_prepped_df(weeks_after=48):
     dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
     fname = dname + 'clipped_{:02d}_labeled_subject_sequences.csv'.format(weeks_after)
 
-    patient_df = pd.read_csv(fname, index_col=0)
+    patient_df = pd.DataFrame()
+    for chunk in pd.read_csv(fname, index_col=0, chunksize=40000):
+        patient_df = patient_df.append(chunk)
 
     return prepped_df_X_y(patient_df)
 
