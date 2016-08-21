@@ -45,6 +45,7 @@ def load(nrows=None):
     date_seq = t.date_seq.fillna('')
     emrg_seq = t.emrg_seq.fillna('')
     in_seq = t.in_seq.fillna('')
+    out_seq = t.out_seq.fillna('')
     pay_seq = t.pay_seq.fillna('')
 
     for y in range(2008, 2015):
@@ -62,6 +63,9 @@ def load(nrows=None):
         in_seq += ' '
         in_seq = in_seq.add(t.in_seq, fill_value='')
 
+        out_seq += ' '
+        out_seq = out_seq.add(t.out_seq, fill_value='')
+
         pay_seq += ' '
         pay_seq = pay_seq.add(t.pay_seq, fill_value='')
     
@@ -69,12 +73,14 @@ def load(nrows=None):
     date_seq = date_seq.fillna('')
     emrg_seq = emrg_seq.fillna('')
     in_seq = in_seq.fillna('')
+    out_seq = out_seq.fillna('')
     pay_seq = pay_seq.fillna('')
 
     return pd.DataFrame({'code_seq': code_seq,
                          'date_seq': date_seq,
                          'emrg_seq': emrg_seq,
                          'in_seq': in_seq,
+                         'out_seq': out_seq,
                          'pay_seq': pay_seq,
                         })
 
@@ -271,7 +277,11 @@ def seqs_during_exposure_period(df, id, weeks_before, weeks_after):
         subjs_wo_dx.append(id)
         return pd.Series(
             {'code_seq': '',
-             'date_seq': ''})
+             'date_seq': '',
+             'out_seq': '',
+             'emrg_seq': '',
+             'pay_seq': '',
+         })
     
     # index of first diagnosis
     i = ix[0]
@@ -288,9 +298,13 @@ def seqs_during_exposure_period(df, id, weeks_before, weeks_after):
     
     ix, = np.where((tt >= t0) & (tt <= t1))
 
-    return pd.Series(
-            {'code_seq': ' '.join(t[ix]),
-             'date_seq': ' '.join([d.strftime('%Y-%m-%d') for d in tt[ix]])})
+    s = pd.Series({'code_seq': ' '.join(t[ix]),
+                   'date_seq': ' '.join([d.strftime('%Y-%m-%d') for d in tt[ix]])})
+    for col in ['out_seq', 'emrg_seq', 'pay_seq']:
+        code_s = pd.Series(df.loc[id, col].split())
+        s[col] = ' '.join(code_s[ix])
+
+    return s
 
 def days_until_surgery(s):
     """calculate time from diagnosis until surgery in days
@@ -397,7 +411,23 @@ def load_prepped_df(weeks_after=48):
 
     patient_df = pd.read_csv(fname, index_col=0)
 
-    patient_df = patient_df[patient_df.y_days >= 52]
+    return prepped_df_X_y(patient_df)
+
+def prepped_df_X_y(patient_df):
+    """Created prepped dataframe for code sequences up to specified number of
+    weeks after diagnosis; after filtering to remove surgeries before
+    52 weeks.
+
+    Parameters
+    ----------
+    patient_df : pd.DataFrame
+
+    Results
+    -------
+    returns df, X, y
+    """
+
+    patient_df = patient_df[patient_df.y_days >= 52*7]
     X = bigram_feature_vectors(patient_df)
     y = np.array(patient_df.y_days <= 2*52*7, dtype=float)
 

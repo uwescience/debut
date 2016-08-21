@@ -12,6 +12,7 @@ def df():
 def test_load():
     df = data.load(nrows=10)
     assert len(df) > 0
+    assert 'out_seq' in df.columns
 
 def test_is_included(df):
     data.is_included(df, 74901)
@@ -30,6 +31,10 @@ def test_included_subjects(df):
 def test_seqs_dur_exposure_period(df):
     s = data.seqs_during_exposure_period(df, df.index[0], -10, 10)
     assert 'code_seq' in s.keys()
+    assert 'out_seq' in s.keys()
+    assert 'emrg_seq' in s.keys()
+    assert 'pay_seq' in s.keys()
+    
 
     s = data.seqs_during_exposure_period(df, df.index[0], 0, 0)
     date_list = s['date_seq'].split()
@@ -49,6 +54,8 @@ def test_clipped_labeled_sequences(df):
     rows = df.index[::5]
     new_df = data.clipped_labeled_sequences(df, rows, -1, 1)
     assert len(new_df) == np.floor(len(df) / 5) + 1
+    for col in ['code_seq', 'date_seq', 'out_seq', 'emrg_seq', 'pay_seq']:
+        assert col in new_df.columns
 
 def test_bigram_feature_vectors(df):
     X = data.bigram_feature_vectors(df)
