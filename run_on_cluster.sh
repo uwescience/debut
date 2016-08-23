@@ -28,9 +28,8 @@ echo "**** JOB RUNNING IN $GSITSPWD"
 # make sure that boost library is in the path
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/boost-current/lib
 
-#source /usr/local/anaconda-current/bin/activate  /usr/local/anaconda-current
-#source deactivate
-source activate /snfs2/HOME/abie/anaconda/envs/testenv
+source /usr/local/anaconda-current/bin/activate debut_env
+
 echo calling python -u "$@"
 python -u "$@"
 

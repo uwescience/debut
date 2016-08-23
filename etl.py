@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 
 assert len(sys.argv) in [2,3], 'usage: python etl.py YEAR [fast_test]'
-print sys.argv[1:]
+print(sys.argv[1:])
 
 year = int(sys.argv[1])
 if len(sys.argv) == 3:
@@ -40,15 +40,13 @@ def read_sas(fname):
     return df
 
 def load(year):
-    import sys
     tics = {}
 
     for letter in 'adios':
-        print letter,
-        sys.stdout.flush
+        print(letter, end="", flush=True)
         fname = dname + 'tics_cohort{}_{:02d}.sas7bdat'.format(letter, year-2000)
         tics[letter, year] = read_sas(fname)
-    print
+    print()
 
     return tics
 tics = load(year)

@@ -16,6 +16,8 @@ Contents:
 * 2016_08_16b_debut_model_sweep_on_prod_cluster.ipynb
 
 Details: probably only runs on IHME cluster, possibly requires `source
-activate testenv`, which includes the dev version of sklearn.
+activate debut_env`, which includes the dev version of sklearn.
+
+To recreate this environment, use the command `conda env create -f environment.yml`
 
 
