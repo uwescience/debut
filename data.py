@@ -367,6 +367,7 @@ def clipped_labeled_sequences(df, subjects, weeks_before, weeks_after):
     patient_df = pd.DataFrame(patient_df, index=subjects)
     return patient_df
 
+trx = None  # HACK: expose transform for future use
 def bigram_feature_vectors(df):
     """form bigram features from code sequence in df
 
@@ -383,6 +384,7 @@ def bigram_feature_vectors(df):
 
     ngram_range = (1,2)
 
+    global trx
     trx = sklearn.feature_extraction.text.CountVectorizer(
         ngram_range=ngram_range,
         min_df=10,  # minimum number of docs that must contain n-gram to include as a column

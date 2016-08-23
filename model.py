@@ -26,7 +26,7 @@ def auc_est(clf, X, y, reps, folds):
     """
     results = []
     for rep in range(10):
-        cv = sklearn.model_selection.KFold(n_folds=10, shuffle=True, random_state=12345+rep)
+        cv = sklearn.model_selection.KFold(n_splits=10, shuffle=True, random_state=12345+rep)
         for fold, (train, test) in enumerate(cv.split(X, y)):
             if (rep in reps) and (fold in folds):
                 print('rep {}, fold {}'.format(rep, fold))
