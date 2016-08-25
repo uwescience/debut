@@ -83,7 +83,9 @@ def train(args):
 
     model = Model(args)
 
-    with tf.Session() as sess:
+    NUM_THREADS=64
+    with tf.Session(config=tf.ConfigProto(
+                        intra_op_parallelism_threads=NUM_THREADS)) as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
         # restore model
