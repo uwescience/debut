@@ -13,9 +13,9 @@ from model import Model
 # add args and defaults
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='/mnt/hgfs/J/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data',
+    parser.add_argument('--data_dir', type=str, default='/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data',
                        help='data directory containing input.txt')
-    parser.add_argument('--save_dir', type=str, default='save',
+    parser.add_argument('--save_dir', type=str, default='/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/intermediate_data/save',
                        help='directory to store checkpointed models')
     parser.add_argument('--rnn_size', type=int, default=128,
                        help='size of RNN hidden state')
