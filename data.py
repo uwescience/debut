@@ -385,11 +385,12 @@ def bigram_feature_vectors(df):
     ngram_range = (1,2)
 
     global trx
-    trx = sklearn.feature_extraction.text.CountVectorizer(
-        ngram_range=ngram_range,
-        min_df=10,  # minimum number of docs that must contain n-gram to include as a column
-        tokenizer=lambda x: [x_i.strip() for x_i in x.split()]  # keep '-' characters in tokens
-    )
+    if trx == None:
+        trx = sklearn.feature_extraction.text.CountVectorizer(
+            ngram_range=ngram_range,
+            min_df=10,  # minimum number of docs that must contain n-gram to include as a column
+            tokenizer=lambda x: [x_i.strip() for x_i in x.split()]  # keep '-' characters in tokens
+        )
     
     X = trx.fit_transform(df.code_seq.fillna(''))
     return X
