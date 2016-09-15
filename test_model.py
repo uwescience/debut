@@ -11,7 +11,7 @@ def df():
 
 @pytest.fixture
 def X(df):
-    return data.bigram_feature_vectors(df)
+    return data.ngram_feature_vectors(df, (1,1))
 
 @pytest.fixture
 def y(df):

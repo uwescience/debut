@@ -58,6 +58,6 @@ def test_clipped_labeled_sequences(df):
     for col in ['code_seq', 'date_seq', 'out_seq', 'emrg_seq', 'pay_seq']:
         assert col in new_df.columns
 
-def test_bigram_feature_vectors(df):
-    X = data.bigram_feature_vectors(df)
+def test_ngram_feature_vectors(df):
+    X = data.ngram_feature_vectors(df, (1,2))
     assert len(X.shape) == 2

@@ -2,19 +2,18 @@ import sys, numpy as np, pandas as pd
 import sklearn.naive_bayes, sklearn.ensemble, sklearn.linear_model, sklearn.model_selection
 import data, model
 
-assert len(sys.argv) in [2,3], 'usage: python auc.py rep [weeks]'
+assert len(sys.argv) == 5, 'usage: python auc.py rep weeks ngram_min ngram_max'
 rep = int(sys.argv[1])
-if len(sys.argv) == 3:
-    weeks_after = int(sys.argv[2])
-else:
-    weeks_after = 48 # default
+weeks_after = int(sys.argv[2])
+ngram_min = int(sys.argv[3])
+ngram_max = int(sys.argv[4])
 print(sys.argv)
 
 # set random seed for reproducibility
 np.random.seed(12345+rep)
 
 # load data
-patient_df, X, y = data.load_prepped_df(weeks_after)
+patient_df, X, y = data.load_prepped_df(weeks_after, ngram_range=(ngram_min, ngram_max))
 
 # create dict of ML methods to consider
 n_jobs = 10  # make sure to request corresponding resource level on cluster
@@ -28,7 +27,7 @@ clf_dict = {'GBM': sklearn.model_selection.GridSearchCV(sklearn.ensemble.Gradien
 
 # run models and save results
 all_results = pd.DataFrame()
-for clf_name, clf in clf_dict.iteritems():
+for clf_name, clf in clf_dict.items():
     print(clf_name)
     sys.stdout.flush()
 
@@ -40,5 +39,5 @@ for clf_name, clf in clf_dict.iteritems():
 
     # save results as you go, to fail faster
     dname = '/homes/abie/projects/2016/TICS/'
-    all_results.to_csv(dname + 'auc_results_{:02d}_{:02d}.csv'.format(rep, weeks_after), index=False)
+    all_results.to_csv(dname + 'auc_results_{:02d}_{:02d}_{:d}-{:d}.csv'.format(rep, weeks_after, ngram_min, ngram_max), index=False)
 

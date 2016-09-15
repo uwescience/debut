@@ -368,21 +368,20 @@ def clipped_labeled_sequences(df, subjects, weeks_before, weeks_after):
     return patient_df
 
 trx = None  # HACK: expose transform for future use
-def bigram_feature_vectors(df):
-    """form bigram features from code sequence in df
+def ngram_feature_vectors(df, ngram_range):
+    """form n-gram features from code sequence in df
 
     Parameters
     ----------
     df : pd.DataFrame with code_seq column
+    ngram_range : tuple (min, max)
     
     Results
     -------
-    returns sparse array of bigram counts
+    returns sparse array of n-gram counts
     """
 
     import sklearn.feature_extraction
-
-    ngram_range = (1,2)
 
     global trx
     if trx == None:
@@ -395,7 +394,7 @@ def bigram_feature_vectors(df):
     X = trx.fit_transform(df.code_seq.fillna(''))
     return X
 
-def load_prepped_df(weeks_after=48, surgery_week_start=52, surgery_week_end=2*52):
+def load_prepped_df(weeks_after=48, surgery_week_start=52, surgery_week_end=2*52, ngram_range=(1,2)):
     """Load prepped dataframe for code sequences up to specified number of
     weeks after diagnosis; after filtering to remove surgeries before
     52 weeks.
@@ -406,6 +405,7 @@ def load_prepped_df(weeks_after=48, surgery_week_start=52, surgery_week_end=2*52
     surgery_week_start : int
     surgery_week_end : int
       weeks to use as start and end points for defining dichotomous outcome variable
+    ngram_range : tuple (min, max)
 
     Results
     -------
@@ -419,9 +419,9 @@ def load_prepped_df(weeks_after=48, surgery_week_start=52, surgery_week_end=2*52
     for chunk in pd.read_csv(fname, index_col=0, chunksize=40000):
         patient_df = patient_df.append(chunk)
 
-    return prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end)
+    return prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end, ngram_range)
 
-def prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end):
+def prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end, ngram_range):
     """Created prepped dataframe for code sequences up to specified number of
     weeks after diagnosis; after filtering to remove surgeries before
     surgery_week_start weeks.
@@ -432,6 +432,7 @@ def prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end):
     surgery_week_start : int
     surgery_week_end : int
       weeks to use as start and end points for defining dichotomous outcome variable
+    ngram_range : tuple (min, max) for for ngrams to extract as features
 
     Results
     -------
@@ -439,7 +440,7 @@ def prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end):
     """
 
     patient_df = patient_df[patient_df.y_days >= surgery_week_start*7]
-    X = bigram_feature_vectors(patient_df)
+    X = ngram_feature_vectors(patient_df, ngram_range)
     y = np.array(patient_df.y_days <= surgery_week_end*7, dtype=float)
 
     return patient_df, X, y
