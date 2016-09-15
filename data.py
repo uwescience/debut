@@ -395,7 +395,7 @@ def bigram_feature_vectors(df):
     X = trx.fit_transform(df.code_seq.fillna(''))
     return X
 
-def load_prepped_df(weeks_after=48):
+def load_prepped_df(weeks_after=48, surgery_week_start=52, surgery_week_end=2*52):
     """Load prepped dataframe for code sequences up to specified number of
     weeks after diagnosis; after filtering to remove surgeries before
     52 weeks.
@@ -403,6 +403,9 @@ def load_prepped_df(weeks_after=48):
     Parameters
     ----------
     weeks_after : int, cached for values in range(-4, 49, 4)
+    surgery_week_start : int
+    surgery_week_end : int
+      weeks to use as start and end points for defining dichotomous outcome variable
 
     Results
     -------
@@ -416,24 +419,27 @@ def load_prepped_df(weeks_after=48):
     for chunk in pd.read_csv(fname, index_col=0, chunksize=40000):
         patient_df = patient_df.append(chunk)
 
-    return prepped_df_X_y(patient_df)
+    return prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end)
 
-def prepped_df_X_y(patient_df):
+def prepped_df_X_y(patient_df, surgery_week_start, surgery_week_end):
     """Created prepped dataframe for code sequences up to specified number of
     weeks after diagnosis; after filtering to remove surgeries before
-    52 weeks.
+    surgery_week_start weeks.
 
     Parameters
     ----------
     patient_df : pd.DataFrame
+    surgery_week_start : int
+    surgery_week_end : int
+      weeks to use as start and end points for defining dichotomous outcome variable
 
     Results
     -------
     returns df, X, y
     """
 
-    patient_df = patient_df[patient_df.y_days >= 52*7]
+    patient_df = patient_df[patient_df.y_days >= surgery_week_start*7]
     X = bigram_feature_vectors(patient_df)
-    y = np.array(patient_df.y_days <= 2*52*7, dtype=float)
+    y = np.array(patient_df.y_days <= surgery_week_end*7, dtype=float)
 
     return patient_df, X, y
