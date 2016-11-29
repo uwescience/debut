@@ -3,6 +3,7 @@ from six.moves import cPickle
 import gzip
 #from ..utils.data_utils import get_file
 from six.moves import zip
+import json
 import numpy as np
 import pandas as pd
 import sys
@@ -34,43 +35,40 @@ def load_data(path='', nb_words=None, skip_top=0,
     have simply been skipped.
     '''
     
-   #  if path.endswith('.gz'):
-   #     f = gzip.open(path, 'rb')
-   # else:
-   #     f = open(path, 'rb')
     dname = '/home/j/LIMITED_USE/PROJECT_FOLDERS/DEBUT/prepped_data/'
-    fname = dname + 'codes_projected_48_regularized.csv'
-    patient_df = pd.read_csv(fname, index_col=0)
+    #fname = dname + 'codes_projected_48_regularized.csv'
+    fname = dname + 'clipped_48_labeled_subject_sequences.csv'
+    #patient_df = pd.read_csv(fname, index_col=0)
+    patient_df = pd.DataFrame()
+    for chunk in pd.read_csv(fname, index_col=0, chunksize=40000):
+        patient_df = patient_df.append(chunk)
 
 
     patient_df = patient_df[patient_df.y_days >= 52*7]
     collist = patient_df.columns.tolist()
-    # Combine two sets of features
-    #print 'Combining cca and bigram features...'
-    #print 'Size of X2', np.size(X2, 0), np.size(X2, 1)
     X = patient_df[collist[:-1]].as_matrix()
-    #X = X2.tocsr()
     labels = np.array(patient_df.y_days <= 2*52*7, dtype=float)
-# (x_train, labels_train), (x_test, labels_test) = cPickle.load(f)
- #   f.close()
 
-    #np.random.seed(seed)
-    #np.random.shuffle(x_train)
-    #np.random.seed(seed)
-    #np.random.shuffle(labels_train)
-
-    #np.random.seed(seed * 2)
-    #np.random.shuffle(x_test)
-    #np.random.seed(seed * 2)
-    #np.random.shuffle(labels_test)
-
-    #X = x_train + x_test
-    #labels = labels_train + labels_test
+    folder = '/ihme/scratch/users/cjones6/temp_data/'
+    save_file = folder+'saved_eigenvectors_regularized25.txt'
+    code_to_int, int_to_code, code_counts, unique_code_counts, n_codes = json.load(open(folder+'saved_dicts', 'r'))
 
     if start_char is not None:
-        X = [[start_char] + [w + index_from for w in x] for x in X]
-    elif index_from:
-        X = [[w + index_from for w in x] for x in X]
+        Y = []
+        num_patients = len(X[:, 0])
+        idx = 0
+        for w in X[:, 0]:
+            idx += 1
+            if idx % 1000 == 0:
+                print 'loading patient', idx, 'of', num_patients
+            Y.append([start_char])
+            w = w.split(' ')
+            for i in w:
+                try:
+                    Y[-1] += [code_to_int[i] + index_from]  
+                except:
+                    pass
+    X = Y
 
     if maxlen:
         new_X = []
